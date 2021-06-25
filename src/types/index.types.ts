@@ -21,6 +21,11 @@ type PositiveStatus = PaymentCompleteStatus;
 
 type CoinpaymentIPNStatus = NegativeStatus | NeutralStatus | PositiveStatus;
 
+enum IPN_DATA {
+  VERSION = '1.0',
+  IPN_MODE = 'hmac',
+}
+
 enum IPN_TYPES {
   SIMPLE = 'simple',
   BUTTON = 'button',
@@ -31,113 +36,113 @@ enum IPN_TYPES {
   WITHDRAWAL = 'withdrawal',
 }
 
-interface BaseIPN extends ParsedUrlQueryInput {
-  ipn_version: string;
-  ipn_mode: 'hmac';
-  ipn_id: string;
-  merchant: string;
-}
+type BaseIPN = {
+  ipn_version: IPN_DATA.VERSION;
+  ipn_mode: IPN_DATA.IPN_MODE;
+  ipn_id: string; // The unique identifier of this IPN
+  merchant: string; // Your merchant ID
+};
 
-interface withCommon {
-  status: CoinpaymentIPNStatus;
-  status_text: string;
-  send_tx: string;
-  received_amount: string;
-  received_confirms: string;
-}
+type withCommon = {
+  status: CoinpaymentIPNStatus; // Numeric status of the payment
+  status_text: string; // A text string describing the status of the payment
+  send_tx?: string; // The TX ID of the payment to the merchant. Only included when 'status' >= 100 and if the payment mode is set to ASAP or Nightly or if the payment is PayPal Passthru.
+  received_amount: string; // The amount of currency2 received at the time the IPN was generated.
+  received_confirms: string; // The number of confirms of 'received_amount' at the time the IPN was generated.
+};
 
-interface withRequiredTX {
-  txn_id: string;
-}
+type withRequiredTX = {
+  txn_id: string; // The unique ID of the payment.
+};
 
-interface withOptionalTX {
-  txn_id?: string;
-}
+type withOptionalTX = {
+  txn_id?: string; // The coin transaction ID of the withdrawal.
+};
 
-interface with2Currency {
-  currency1: string;
-  currency2: string;
-  amount1: string;
-  amount2: string;
-}
+type with2Currency = {
+  currency1: string; // The original currency/coin submitted in your button.
+  currency2: string; // The coin the buyer chose to pay with.
+  amount1: string; // The total amount of the payment in your original currency/coin.
+  amount2: string; // The total amount of the payment in the buyer's selected coin.
+};
 
-interface withSubtotal {
-  subtotal: string;
-}
+type withSubtotal = {
+  subtotal: string; // The subtotal of the order before shipping and tax in your original currency/coin.
+};
 
-interface withSingleItemOptions {
-  on1?: string;
-  ov1?: string;
-  on2?: string;
-  ov2?: string;
-}
+type withSingleItemOptions = {
+  on1?: string; // 1st option name. This lets you pass through a buyer option like size or color.
+  ov1?: string; // 1st option value. This would be the buyer's selection such as small, large, red, white.
+  on2?: string; // 2nd option name. This lets you pass through a buyer option like size or color.
+  ov2?: string; // 2nd option value. This would be the buyer's selection such as small, large, red, white.
+};
 
-interface withShippingFee {
-  shipping: string;
-}
+type withShippingFee = {
+  shipping: string; // The shipping charged on the order in your original currency/coin.
+};
 
-interface withTax {
-  tax: string;
-}
-interface withFee {
-  fee: string;
-}
-interface withNet {
-  net: string;
-}
-interface withItemAmount {
-  item_amount: string;
-}
-interface withItemDesc {
-  item_desc?: string;
-}
+type withTax = {
+  tax: string; // The tax on the order in your original currency/coin.
+};
+type withFee = {
+  fee: string; // The fee on the payment in the buyer's selected coin.
+};
+type withNet = {
+  net: string; // The net amount you received of the buyer's selected coin after our fee and any coin TX fees to send the coins to you.
+};
+type withItemAmount = {
+  item_amount: string; // The amount per-item in the original currency/coin.
+};
+type withItemDesc = {
+  item_desc?: string; // Description of the item that was purchased.
+};
 
-interface withSomeItemInfo {
-  item_name: string;
-  item_number?: string;
-}
-interface withOptionalItemInfo {
-  item_name?: string;
-  item_number?: string;
-}
-interface withInvoice {
-  invoice?: string;
-}
-interface withCustom {
-  custom?: string;
-}
-interface withExtra {
-  extra?: string;
-}
+type withSomeItemInfo = {
+  item_name: string; // The name of the donation.
+  item_number?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+};
+type withOptionalItemInfo = {
+  item_name?: string; // The name of the item that was purchased.
+  item_number?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+};
+type withInvoice = {
+  invoice?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+};
+type withCustom = {
+  custom?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+};
+type withExtra = {
+  extra?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+};
 
-interface withBuyerInfo {
-  buyer_name?: string;
-  email?: string;
-}
+type withBuyerInfo = {
+  buyer_name?: string; // The name of the buyer.
+  email?: string; // Buyer's email address.
+};
 
-interface withBuyerInfoFull {
-  first_name: string;
-  last_name: string;
-  company?: string;
-  email: string;
-}
+type withBuyerInfoFull = {
+  first_name: string; // Buyer's first name.
+  last_name: string; // Buyer's last name.
+  company?: string; // Buyer's company name.
+  email: string; // Buyer's email address.
+};
 
-interface withBuyerShippingAddress {
-  address1?: string;
-  address2?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  country?: string;
-  country_name?: string;
-  phone?: string;
-}
-interface withCurrency {
-  address: string;
-  currency: string;
-  amount: string;
-  amounti: string;
-}
+type withBuyerShippingAddress = {
+  address1?: string; // Buyer Street / address line 1
+  address2?: string; // Buyer Street / address line 2
+  city?: string; // Buyer city
+  state?: string; // Buyer state/province
+  zip?: string; // Buyer zipcode
+  country?: string; // Buyer country ISO 3166
+  country_name?: string; // Buyer country pretty
+  phone?: string; // Buyer phone number
+};
+type withCurrency = {
+  address: string; // Coin address which was sent to.
+  currency: string; // The coin the buyer paid with.
+  amount: string; // The total amount of the payment
+  amounti: string; // The total amount of the payment in Satoshis
+};
 
 type SimpleIPN = BaseIPN & { type: IPN_TYPES.SIMPLE } & with2Currency &
   withSubtotal &
@@ -215,22 +220,34 @@ type ApiIPN = BaseIPN & { type: IPN_TYPES.API } & with2Currency &
 type DepositIPN = BaseIPN & { type: IPN_TYPES.DEPOSIT } & withCurrency & {
     dest_tag?: string;
     confirms: number;
-    fee?: string; // Only positive
-    feei?: string; // Only positive
+    fee?: string; // The fee deducted by CoinPayments (only sent when status >= 100)
+    feei?: string; // The fee deducted by CoinPayments in Satoshis (only sent when status >= 100)
     fiat_coin: string; // The ticker code of the fiat currency you selected on the Merchant Settings tab of the Account Settings page (USD, EUR, etc.) Make sure to check this for accuracy for security in your IPN handler! Huh?
-    fiat_amount: string;
-    fiat_amounti: string;
-    fiat_fee?: string; // Only positive
-    fiat_feei?: string; // Only positive
-    label?: string;
+    fiat_amount: string; // The total amount of the payment in the fiat currency you selected on the Merchant Settings tab of the Account Settings page.
+    fiat_amounti: string; // The total amount of the payment in the fiat currency you selected in Satoshis
+    fiat_fee?: string; // The fee deducted by CoinPayments in the fiat currency you selected (only sent when status >= 100)
+    fiat_feei?: string; // The fee deducted by CoinPayments in the fiat currency you selected in Satoshis (only sent when status >= 100)
+    label?: string; // The address label if you have one set
   };
 
 type WithdrawalIPN = BaseIPN & { type: IPN_TYPES.WITHDRAWAL } & withCurrency &
   withOptionalTX & {
-    id: string;
+    id: string; // The ID of the withdrawal ('id' field returned from 'create_withdrawal'.)
   };
 
+type CoinpaymentsIPNLike = BaseIPN & ParsedUrlQueryInput;
+type CoinpaymentsIPN =
+  | SimpleIPN
+  | ButtonIPN
+  | DonationIPN
+  | CartIPN
+  | ApiIPN
+  | DepositIPN
+  | WithdrawalIPN;
+
 export {
+  CoinpaymentsIPNLike,
+  CoinpaymentsIPN,
   SimpleIPN,
   ButtonIPN,
   DonationIPN,
@@ -238,4 +255,6 @@ export {
   ApiIPN,
   DepositIPN,
   WithdrawalIPN,
+  IPN_DATA,
+  IPN_TYPES,
 };
