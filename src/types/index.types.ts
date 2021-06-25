@@ -36,11 +36,21 @@ enum IPN_TYPES {
   WITHDRAWAL = 'withdrawal',
 }
 
+type IPNType =
+  | IPN_TYPES.SIMPLE
+  | IPN_TYPES.BUTTON
+  | IPN_TYPES.DONATION
+  | IPN_TYPES.CART
+  | IPN_TYPES.API
+  | IPN_TYPES.DEPOSIT
+  | IPN_TYPES.WITHDRAWAL;
+
 type BaseIPN = {
   ipn_version: IPN_DATA.VERSION;
   ipn_mode: IPN_DATA.IPN_MODE;
   ipn_id: string; // The unique identifier of this IPN
   merchant: string; // Your merchant ID
+  type: IPNType;
 };
 
 type withCommon = {
@@ -257,4 +267,5 @@ export {
   WithdrawalIPN,
   IPN_DATA,
   IPN_TYPES,
+  IPNType,
 };
