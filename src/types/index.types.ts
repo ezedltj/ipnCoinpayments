@@ -41,10 +41,17 @@ interface BaseIPN extends ParsedUrlQueryInput {
 interface withCommon {
   status: CoinpaymentIPNStatus;
   status_text: string;
-  txn_id: string;
   send_tx: string;
   received_amount: string;
   received_confirms: string;
+}
+
+interface withRequiredTX {
+  txn_id: string;
+}
+
+interface withOptionalTX {
+  txn_id?: string;
 }
 
 interface with2Currency {
@@ -59,10 +66,10 @@ interface withSubtotal {
 }
 
 interface withSingleItemOptions {
-  on1: string;
-  ov1: string;
-  on2: string;
-  ov2: string;
+  on1?: string;
+  ov1?: string;
+  on2?: string;
+  ov2?: string;
 }
 
 interface withShippingFee {
@@ -82,32 +89,36 @@ interface withItemAmount {
   item_amount: string;
 }
 interface withItemDesc {
-  item_desc: string;
+  item_desc?: string;
 }
 
-interface withItemInfo {
+interface withSomeItemInfo {
   item_name: string;
-  item_number: string;
+  item_number?: string;
+}
+interface withOptionalItemInfo {
+  item_name?: string;
+  item_number?: string;
 }
 interface withInvoice {
-  invoice: string;
+  invoice?: string;
 }
 interface withCustom {
-  custom: string;
+  custom?: string;
 }
 interface withExtra {
-  extra: string;
+  extra?: string;
 }
 
 interface withBuyerInfo {
-  buyer_name: string;
-  email: string;
+  buyer_name?: string;
+  email?: string;
 }
 
 interface withBuyerInfoFull {
   first_name: string;
   last_name: string;
-  company: string;
+  company?: string;
   email: string;
 }
 
@@ -135,12 +146,13 @@ type SimpleIPN = BaseIPN & { type: IPN_TYPES.SIMPLE } & with2Currency &
   withTax &
   withFee &
   withNet &
-  withItemInfo &
+  withOptionalItemInfo &
   withItemAmount &
   withItemDesc &
   withInvoice &
   withCustom &
   withCommon &
+  withRequiredTX &
   withBuyerInfoFull &
   withBuyerShippingAddress;
 
@@ -151,12 +163,13 @@ type ButtonIPN = BaseIPN & { type: IPN_TYPES.BUTTON } & with2Currency &
   withTax &
   withFee &
   withNet &
-  withItemInfo &
+  withOptionalItemInfo &
   withItemAmount &
   withInvoice &
   withCustom &
   withExtra &
   withCommon &
+  withRequiredTX &
   withBuyerInfoFull &
   withBuyerShippingAddress;
 
@@ -167,11 +180,12 @@ type DonationIPN = BaseIPN & { type: IPN_TYPES.DONATION } & with2Currency &
   withTax &
   withFee &
   withNet &
-  withItemInfo &
+  withOptionalItemInfo &
   withInvoice &
   withCustom &
   withExtra &
   withCommon &
+  withRequiredTX &
   withBuyerInfoFull &
   withBuyerShippingAddress;
 
@@ -184,6 +198,7 @@ type CartIPN = BaseIPN & { type: IPN_TYPES.CART } & with2Currency &
   withCustom &
   withExtra &
   withCommon &
+  withRequiredTX &
   withBuyerInfoFull &
   withBuyerShippingAddress &
   NodeJS.Dict<string>; // item_name_#...
@@ -191,10 +206,11 @@ type CartIPN = BaseIPN & { type: IPN_TYPES.CART } & with2Currency &
 type ApiIPN = BaseIPN & { type: IPN_TYPES.API } & with2Currency &
   withFee &
   withBuyerInfo &
-  withItemInfo &
+  withSomeItemInfo &
   withInvoice &
   withCustom &
-  withCommon;
+  withCommon &
+  withRequiredTX;
 
 type DepositIPN = BaseIPN & { type: IPN_TYPES.DEPOSIT } & withCurrency & {
     dest_tag?: string;
@@ -209,7 +225,8 @@ type DepositIPN = BaseIPN & { type: IPN_TYPES.DEPOSIT } & withCurrency & {
     label?: string;
   };
 
-type WithdrawalIPN = BaseIPN & { type: IPN_TYPES.WITHDRAWAL } & withCurrency & {
+type WithdrawalIPN = BaseIPN & { type: IPN_TYPES.WITHDRAWAL } & withCurrency &
+  withOptionalTX & {
     id: string;
   };
 
