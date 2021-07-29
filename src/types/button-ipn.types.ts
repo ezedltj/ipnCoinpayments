@@ -1,10 +1,10 @@
-import { ParsedUrlQueryInput } from 'querystring';
+import { O } from 'ts-toolbelt';
+
 import {
   BaseIPN,
   IPN_TYPES,
   with2Currency,
   withBuyerInfoFull,
-  withBuyerShippingAddress,
   withCommon,
   withCustom,
   withExtra,
@@ -12,32 +12,43 @@ import {
   withInvoice,
   withItemAmount,
   withNet,
-  withOptionalItemInfo,
-  withRequiredTX,
+  withItemName,
+  withTx,
   withShippingFee,
   withSingleItemOptions,
   withSubtotal,
   withTax,
+  withQuantity,
+  withItemNumber,
 } from './common.types';
 
-export type ButtonIPNLike = BaseIPN & {
-  type: IPN_TYPES.BUTTON;
-} & ParsedUrlQueryInput;
+import { withShipping } from './util.types';
 
-export type ButtonIPN = ButtonIPNLike &
-  with2Currency &
-  withSubtotal &
-  withSingleItemOptions &
-  withShippingFee &
-  withTax &
-  withFee &
-  withNet &
-  withOptionalItemInfo &
-  withItemAmount &
-  withInvoice &
-  withCustom &
-  withExtra &
-  withCommon &
-  withRequiredTX &
-  withBuyerInfoFull &
-  withBuyerShippingAddress;
+export type ButtonIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.BUTTON }>;
+
+export type ButtonIPNFields = O.MergeAll<
+  {},
+  [
+    with2Currency,
+    withSubtotal,
+    withSingleItemOptions,
+    withShippingFee,
+    withTax,
+    withFee,
+    withNet,
+    Partial<withItemNumber>,
+    withItemName,
+    withItemAmount,
+    withInvoice,
+    withQuantity,
+    withCustom,
+    withExtra,
+    withCommon,
+    withTx,
+    withBuyerInfoFull,
+  ]
+>;
+
+export type ButtonIPN =
+  | O.Merge<ButtonIPNHead, ButtonIPNFields>
+  | O.Merge<ButtonIPNHead, withShipping<ButtonIPNFields>>;

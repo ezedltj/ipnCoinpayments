@@ -102,7 +102,7 @@ const withWithdrawalIdKeys = (): Array<keyof withWithdrawalId> => ['id'];
 const withRequiredTXKeys = (): Array<keyof withRequiredTX> => ['txn_id'];
 const withOptionalTXKeys = (): Array<keyof withOptionalTX> => [];
 
-const SimpleIPNKeys = () =>
+const SimpleIPNKeys = (): Array<keyof SimpleIPN> =>
   []
     .concat(with2CurrencyKeys())
     .concat(withSubtotalKeys())
@@ -195,10 +195,15 @@ const WithdrawalIPNKeys = (): Array<keyof DepositIPN> =>
     .concat(withOptionalTXKeys())
     .concat(withWithdrawalIdKeys());
 
-const parseSimpleIPN = (simpleIPNLike: SimpleIPNLike) => {
+// type parseResult<T> = [Array<keyof T>, Partial<T> | T];
+
+const parseSimpleIPN = (
+  simpleIPNLike: SimpleIPNLike,
+): parseResult<SimpleIPN> => {
   const requiredKeys = SimpleIPNKeys();
-  const invalidKeys = requiredKeys.map(
+  const invalidKeys = requiredKeys.filter(
     hasNonEmptyValue<SimpleIPNLike>(simpleIPNLike),
   );
-  return [invalidKeys];
+  if (invalidKeys.length) return [invalidKeys, simpleIPNLike];
+  return [invalidKeys, simpleIPNLike as SimpleIPN];
 };

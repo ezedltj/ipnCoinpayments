@@ -1,5 +1,5 @@
-import { ParsedUrlQueryInput } from 'querystring';
-import { BaseIPN, IPN_TYPES, withCurrency } from './common.types';
+import { O } from 'ts-toolbelt';
+import { BaseIPN, IPN_TYPES, withCurrency, withTx } from './common.types';
 
 export type withDepositExtras = {
   dest_tag?: string;
@@ -14,8 +14,11 @@ export type withDepositExtras = {
   label?: string; // The address label if you have one set
 };
 
-export type DepositIPNLike = BaseIPN & {
-  type: IPN_TYPES.DEPOSIT;
-} & ParsedUrlQueryInput;
+export type DepositIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.DEPOSIT }>;
 
-export type DepositIPN = DepositIPNLike & withCurrency & withDepositExtras;
+export type DepositIPNFields = O.MergeAll<
+  {},
+  [withTx, withCurrency, withDepositExtras]
+>;
+
+export type DepositIPN = O.Merge<DepositIPNHead, DepositIPNFields>;

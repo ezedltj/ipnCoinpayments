@@ -1,4 +1,4 @@
-import { ParsedUrlQueryInput } from 'querystring';
+import { O } from 'ts-toolbelt';
 import {
   BaseIPN,
   IPN_TYPES,
@@ -9,34 +9,40 @@ import {
   withTax,
   withFee,
   withNet,
-  withOptionalItemInfo,
+  withItemName,
+  withItemNumber,
   withInvoice,
   withCustom,
   withExtra,
   withCommon,
-  withRequiredTX,
+  withTx,
   withBuyerInfoFull,
-  withBuyerShippingAddress,
 } from './common.types';
+import { withShipping } from './util.types';
 
-export type DonationIPNLike = BaseIPN & {
-  type: IPN_TYPES.DONATION;
-} & ParsedUrlQueryInput;
+export type DonationIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.DONATION }>;
 
-export type DonationIPN = BaseIPN & {
-  type: IPN_TYPES.DONATION;
-} & with2Currency &
-  withSubtotal &
-  withSingleItemOptions &
-  withShippingFee &
-  withTax &
-  withFee &
-  withNet &
-  withOptionalItemInfo &
-  withInvoice &
-  withCustom &
-  withExtra &
-  withCommon &
-  withRequiredTX &
-  withBuyerInfoFull &
-  withBuyerShippingAddress;
+export type DonationIPNFields = O.MergeAll<
+  {},
+  [
+    with2Currency,
+    withSubtotal,
+    withSingleItemOptions,
+    withShippingFee,
+    withTax,
+    withFee,
+    withNet,
+    withItemName,
+    Partial<withItemNumber>,
+    withInvoice,
+    withCustom,
+    withExtra,
+    withCommon,
+    withTx,
+    withBuyerInfoFull,
+  ]
+>;
+
+export type DonationIPN =
+  | O.Merge<DonationIPNHead, DonationIPNFields>
+  | O.Merge<DonationIPNHead, withShipping<DonationIPNFields>>;

@@ -15,7 +15,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    // highly recommended (required by few utilities)
+    "strictNullChecks": true,
+
+    // this is optional, but enable whenever possible
+    "strict": true,
   },
   "include": ["./src/**/*.ts", "./tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]

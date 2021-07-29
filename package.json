@@ -16,7 +16,8 @@
     "prettier": "^2.3.1",
     "ts-jest": "^27.0.3",
     "ts-node": "^10.0.0",
-    "typescript": "^4.3.4"
+    "typescript": "^4.3.4",
+    "ts-toolbelt": "^9.6.0"
   },
   "scripts": {
     "build": "rm -rf dist/ && tsc -p tsconfig.build.json",
@@ -39,6 +40,8 @@
   "homepage": "https://github.com/OrahKokos/coinpayments-ipn#readme",
   "keywords": [
     "Coinpayments",
-    "coinpayments"
+    "coinpayments",
+    "Coinpayments-IPN",
+    "coinpayments-ipn"
   ]
 }

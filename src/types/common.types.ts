@@ -24,35 +24,23 @@ export type IPNType =
   | IPN_TYPES.DEPOSIT
   | IPN_TYPES.WITHDRAWAL;
 
-export type BaseIPNRaw = {
-  ipn_version: IPN_DATA.VERSION;
-  ipn_mode: IPN_DATA.IPN_MODE;
-  ipn_id: string; // The unique identifier of this IPN
-  merchant: string; // Your merchant ID
-  type: IPNType;
-};
-
 export type BaseIPN = {
   ipn_version: IPN_DATA.VERSION;
   ipn_mode: IPN_DATA.IPN_MODE;
   ipn_id: string; // The unique identifier of this IPN
-  merchant: string; // Your merchant ID
+  merchant: string; // Your merchant ID,
+  status: CoinpaymentIPNStatus; // Numeric status of the payment
+  status_text: string; // A text string describing the status of the payment
 };
 
 export type withCommon = {
-  status: CoinpaymentIPNStatus; // Numeric status of the payment
-  status_text: string; // A text string describing the status of the payment
   send_tx?: string; // The TX ID of the payment to the merchant. Only included when 'status' >= 100 and if the payment mode is set to ASAP or Nightly or if the payment is PayPal Passthru.
-  received_amount: string; // The amount of currency2 received at the time the IPN was generated.
-  received_confirms: string; // The number of confirms of 'received_amount' at the time the IPN was generated.
+  received_amount?: string; // The amount of currency2 received at the time the IPN was generated.
+  received_confirms?: string; // The number of confirms of 'received_amount' at the time the IPN was generated.
 };
 
-export type withRequiredTX = {
-  txn_id: string; // The unique ID of the payment.
-};
-
-export type withOptionalTX = {
-  txn_id?: string; // The coin transaction ID of the withdrawal.
+export type withTx = {
+  txn_id: string;
 };
 
 export type with2Currency = {
@@ -60,6 +48,10 @@ export type with2Currency = {
   currency2: string; // The coin the buyer chose to pay with.
   amount1: string; // The total amount of the payment in your original currency/coin.
   amount2: string; // The total amount of the payment in the buyer's selected coin.
+};
+
+export type withQuantity = {
+  quantity: string;
 };
 
 export type withSubtotal = {
@@ -93,14 +85,14 @@ export type withItemDesc = {
   item_desc?: string; // Description of the item that was purchased.
 };
 
-export type withSomeItemInfo = {
+export type withItemName = {
   item_name: string; // The name of the donation.
-  item_number?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
 };
-export type withOptionalItemInfo = {
-  item_name?: string; // The name of the item that was purchased.
-  item_number?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
+
+export type withItemNumber = {
+  item_number: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
 };
+
 export type withInvoice = {
   invoice?: string; // This is a passthru variable for your own use. [not visible to donator/buyer]
 };
