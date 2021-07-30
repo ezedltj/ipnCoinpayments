@@ -31,3 +31,5 @@ export type ApiIPNFields = O.MergeAll<
 >;
 
 export type ApiIPN = O.Merge<ApiIPNHead, ApiIPNFields>;
+
+export type ApiIPNLike = O.Merge<ApiIPNHead, O.Record<string, string>>;

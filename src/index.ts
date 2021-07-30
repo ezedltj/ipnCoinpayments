@@ -1,20 +1,15 @@
 import crypto from 'crypto';
+import CoinpaymentsIPNError from 'error';
 import qs from 'querystring';
-import { ApiIPN, ApiIPNLike } from 'types/api-ipn.types';
-import { ButtonIPN, ButtonIPNLike } from 'types/button-ipn.types';
-import { CartIPN, CartIPNLike } from 'types/cart-ipn.types';
+import { ApiIPNLike } from 'types/api-ipn.types';
+import { ButtonIPNLike } from 'types/button-ipn.types';
+import { CartIPNLike } from 'types/cart-ipn.types';
 import { IPNType, IPN_TYPES, IPN_DATA } from 'types/common.types';
-import { DepositIPN, DepositIPNLike } from 'types/deposit-ipn.types';
-import { DonationIPN, DonationIPNLike } from 'types/donation-ipn.types';
-import { SimpleIPN, SimpleIPNLike } from 'types/simple-ipn.types';
+import { DepositIPNLike } from 'types/deposit-ipn.types';
+import { DonationIPNLike } from 'types/donation-ipn.types';
+import { SimpleIPNLike } from 'types/simple-ipn.types';
 import { UnknownIPN } from 'types/unknown-ipn.types';
-import { WithdrawalIPN, WithdrawalIPNLike } from 'types/withdrawal-ipn.types';
-import CoinpaymentsIPNError from './error';
-import {
-  CoinpaymentsIPNLike,
-  CoinpaymentsIPN,
-  processIPNTuple,
-} from './types/index.types';
+import { WithdrawalIPNLike } from 'types/withdrawal-ipn.types';
 
 const parseObject = (obj: unknown): NodeJS.Dict<unknown> | undefined => {
   if (Object.prototype.toString.call(obj) === '[object Object]') {

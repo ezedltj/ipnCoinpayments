@@ -1,6 +1,8 @@
-import { ParsedUrlQueryInput } from 'querystring';
+import { O } from 'ts-toolbelt';
 import { BaseIPN } from './common.types';
 
-export type UnknownIPN = BaseIPN & {
-  type: string;
-} & ParsedUrlQueryInput;
+// Not in enum
+export type UnknownIPNHead = O.Merge<BaseIPN, { type: string }>;
+export type UnknownIPNFields = O.Record<PropertyKey, string>;
+
+export type UnknownIPN = O.Merge<UnknownIPNHead, UnknownIPNFields>;

@@ -50,3 +50,5 @@ export type SimpleIPNFields = O.MergeAll<
 export type SimpleIPN =
   | O.Merge<SimpleIPNHead, SimpleIPNFields>
   | O.Merge<SimpleIPNHead, withShipping<SimpleIPNFields>>;
+
+export type SimpleIPNLike = O.Merge<SimpleIPNHead, O.Record<string, string>>;

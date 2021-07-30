@@ -52,3 +52,5 @@ export type ButtonIPNFields = O.MergeAll<
 export type ButtonIPN =
   | O.Merge<ButtonIPNHead, ButtonIPNFields>
   | O.Merge<ButtonIPNHead, withShipping<ButtonIPNFields>>;
+
+export type ButtonIPNLike = O.Merge<ButtonIPNHead, O.Record<string, string>>;

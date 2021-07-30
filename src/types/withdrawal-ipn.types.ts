@@ -16,3 +16,8 @@ export type WithdrawalIPNFields = O.MergeAll<
 >;
 
 export type WithdrawalIPN = O.Merge<WithdrawalIPNHead, WithdrawalIPNFields>;
+
+export type WithdrawalIPNLike = O.Merge<
+  WithdrawalIPNHead,
+  O.Record<string, string>
+>;

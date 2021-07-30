@@ -46,3 +46,8 @@ export type DonationIPNFields = O.MergeAll<
 export type DonationIPN =
   | O.Merge<DonationIPNHead, DonationIPNFields>
   | O.Merge<DonationIPNHead, withShipping<DonationIPNFields>>;
+
+export type DonationIPNLike = O.Merge<
+  DonationIPNHead,
+  O.Record<string, string>
+>;

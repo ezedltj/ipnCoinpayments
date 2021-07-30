@@ -22,3 +22,5 @@ export type DepositIPNFields = O.MergeAll<
 >;
 
 export type DepositIPN = O.Merge<DepositIPNHead, DepositIPNFields>;
+
+export type DepositIPNLike = O.Merge<DepositIPNHead, O.Record<string, string>>;
