@@ -1,56 +1,112 @@
-import { O } from 'ts-toolbelt';
+import { Iterate } from './util.types';
+
+import * as t from 'io-ts';
+import * as RNEA from 'fp-ts/ReadonlyNonEmptyArray';
+import * as RA from 'fp-ts/ReadonlyArray';
+import * as Rec from 'fp-ts/Record';
+import * as O from 'fp-ts/Option';
+import * as S from 'fp-ts/string';
+
+import { pipe, identity, constFalse } from 'fp-ts/lib/function';
+
 import {
-  BaseIPN,
   IPN_TYPES,
-  with2Currency,
-  withSubtotal,
-  withShippingFee,
-  withTax,
-  withFee,
-  withInvoice,
-  withCustom,
-  withExtra,
-  withCommon,
-  withTx,
-  withBuyerInfoFull,
-  withBuyerShippingAddress,
+  BaseIPN,
+  BuyerInformation,
+  ShippingInformation,
 } from './common.types';
-import { withIterableKeys, withShipping } from './util.types';
+import { NagativeStatus, PendingStatus, PositiveStatus } from './status.types';
+import { matchRegex, isLength, runRegex } from '../util';
 
-export type CartIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.CART }>;
+export const CartIPNHead = t.intersection([
+  BaseIPN,
+  t.type({ type: t.literal(IPN_TYPES.CART) }),
+]);
 
-export type CartIPNItemFields = {
-  item_name: string;
-  item_amount: string;
-  item_quantity: string;
-  item_number: string;
-  item_on1: string;
-  item_on2: string;
-  item_ov1: string;
-  item_ov2: string;
+export const CartIPNRequiredFields = t.type({
+  status_text: t.string,
+  txn_id: t.string,
+  currency1: t.string,
+  currency2: t.string,
+  amount1: t.string,
+  amount2: t.string,
+  subtotal: t.string,
+  shipping: t.string,
+  tax: t.string,
+  fee: t.string,
+});
+
+export const CartIPNOptionalFields = t.partial({
+  invoice: t.string,
+  custom: t.string,
+  extra: t.string,
+  send_tx: t.string,
+  received_amount: t.string,
+  received_confirms: t.string,
+});
+
+export const CartIPNFields = t.intersection([
+  CartIPNHead,
+  CartIPNRequiredFields,
+  CartIPNOptionalFields,
+  BuyerInformation,
+  ShippingInformation,
+]);
+
+export const CartIPNDefault = t.intersection([
+  CartIPNFields,
+  t.type({
+    status: t.union([NagativeStatus, PendingStatus]),
+  }),
+]);
+
+export const CartIPNPositive = t.intersection([
+  CartIPNFields,
+  t.type({
+    status: PositiveStatus,
+  }),
+  t.partial({ send_tx: t.string }),
+]);
+
+export const CartIPNPartial = t.union([CartIPNDefault, CartIPNPositive]);
+
+type CartIPNPartial = t.TypeOf<typeof CartIPNPartial>;
+
+type ExtraCartIPNRawFields = {
+  item_name_: string;
+  item_amount_: string;
+  item_quantity_: string;
+  item_number_?: string;
+  item_on1_?: string;
+  item_ov1_?: string;
+  item_on2_?: string;
+  item_ov2_?: string;
 };
 
-export type CartIPNFields = O.MergeAll<
-  {},
-  [
-    with2Currency,
-    withSubtotal,
-    withShippingFee,
-    withTax,
-    withFee,
-    withInvoice,
-    withCustom,
-    withExtra,
-    withCommon,
-    withTx,
-    withBuyerInfoFull,
-    withBuyerShippingAddress,
-    withIterableKeys<CartIPNItemFields>,
-  ]
->;
+type ExtraCartIPNFields = Iterate<ExtraCartIPNRawFields>;
 
-export type CartIPN =
-  | O.Merge<CartIPNHead, CartIPNFields>
-  | O.Merge<CartIPNHead, withShipping<CartIPNFields>>;
+export type CartIPN = CartIPNPartial & ExtraCartIPNFields;
 
-export type CartIPNLike = O.Merge<CartIPNHead, O.Record<string, string>>;
+const cartIpnIterableFields = new RegExp(
+  /^(item_name|item_amount|item_quantity|item_number|item_on1|item_ov1|item_on2|item_ov2)_\d+$/,
+);
+
+const requiredCartIpnIterableFields = [
+  /item_name/,
+  /item_amount/,
+  /item_quantity/,
+];
+
+export const isCartIPNFull = (cartIPN: CartIPNPartial): cartIPN is CartIPN =>
+  pipe(
+    cartIPN,
+    Object.keys,
+    RA.filter(matchRegex(cartIpnIterableFields)),
+    RA.map(S.split(/_(?=\d+$)/g)),
+    RA.traverse(O.Applicative)(O.fromPredicate(isLength(2))),
+    O.map(RNEA.groupBy(([_a, b]) => b)),
+    O.map(Rec.map(RNEA.map(RNEA.head))),
+    O.map(Rec.map(runRegex(requiredCartIpnIterableFields))),
+    O.map(Rec.every<boolean>(identity)),
+    O.getOrElse(constFalse),
+  );

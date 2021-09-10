@@ -1,56 +1,66 @@
-import { O } from 'ts-toolbelt';
+import * as t from 'io-ts';
 
 import {
-  BaseIPN,
   IPN_TYPES,
-  with2Currency,
-  withBuyerInfoFull,
-  withCommon,
-  withCustom,
-  withExtra,
-  withFee,
-  withInvoice,
-  withItemAmount,
-  withNet,
-  withItemName,
-  withTx,
-  withShippingFee,
-  withSingleItemOptions,
-  withSubtotal,
-  withTax,
-  withQuantity,
-  withItemNumber,
+  BaseIPN,
+  BuyerInformation,
+  ShippingInformation,
 } from './common.types';
+import { NagativeStatus, PendingStatus, PositiveStatus } from './status.types';
 
-import { withShipping } from './util.types';
+export const ButtonIPNHead = t.intersection([
+  BaseIPN,
+  t.type({ type: t.literal(IPN_TYPES.BUTTON) }),
+]);
 
-export type ButtonIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.BUTTON }>;
+export const ButtonIPNRequiredFields = t.type({
+  status_text: t.string,
+  txn_id: t.string,
+  currency1: t.string,
+  currency2: t.string,
+  amount1: t.string,
+  amount2: t.string,
+  subtotal: t.string,
+  shipping: t.string,
+  tax: t.string,
+  fee: t.string,
+  net: t.string,
+  item_amount: t.string,
+  item_name: t.string,
+  quantity: t.number,
+});
 
-export type ButtonIPNFields = O.MergeAll<
-  {},
-  [
-    with2Currency,
-    withSubtotal,
-    withSingleItemOptions,
-    withShippingFee,
-    withTax,
-    withFee,
-    withNet,
-    Partial<withItemNumber>,
-    withItemName,
-    withItemAmount,
-    withInvoice,
-    withQuantity,
-    withCustom,
-    withExtra,
-    withCommon,
-    withTx,
-    withBuyerInfoFull,
-  ]
->;
+export const ButtonIPNOptionalFields = t.partial({
+  item_number: t.string,
+  invoice: t.string,
+  custom: t.string,
+  on1: t.string,
+  ov1: t.string,
+  on2: t.string,
+  ov2: t.string,
+  extra: t.string,
+  send_tx: t.string,
+  received_amount: t.string,
+  received_confirms: t.string,
+});
 
-export type ButtonIPN =
-  | O.Merge<ButtonIPNHead, ButtonIPNFields>
-  | O.Merge<ButtonIPNHead, withShipping<ButtonIPNFields>>;
+export const ButtonIPNFields = t.intersection([
+  ButtonIPNHead,
+  ButtonIPNRequiredFields,
+  ButtonIPNOptionalFields,
+  BuyerInformation,
+  ShippingInformation,
+]);
 
-export type ButtonIPNLike = O.Merge<ButtonIPNHead, O.Record<string, string>>;
+export const ButtonIPNDefault = t.intersection([
+  ButtonIPNFields,
+  t.type({ status: t.union([NagativeStatus, PendingStatus]) }),
+]);
+
+export const ButtonIPNPositive = t.intersection([
+  ButtonIPNFields,
+  t.type({ status: PositiveStatus }),
+  t.partial({ send_tx: t.string }),
+]);
+
+export const ButtonIPN = t.union([ButtonIPNDefault, ButtonIPNPositive]);

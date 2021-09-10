@@ -1,23 +1,43 @@
-import { O } from 'ts-toolbelt';
-import { BaseIPN, IPN_TYPES, withCurrency, withTx } from './common.types';
+import * as t from 'io-ts';
 
-export type withWithdrawalId = {
-  id: string; // The ID of the withdrawal ('id' field returned from 'create_withdrawal'.)
-};
+import { IPN_TYPES, BaseIPN } from './common.types';
+import { Number } from './util.types';
+import { isNumberLT } from '../util';
 
-export type WithdrawalIPNHead = O.Merge<
+export const WithdrawalStatusFailed = Number(isNumberLT(0));
+export const WithdrawalStatusEmailConfrimation = t.literal(0);
+export const WithdrawalStatusPending = t.literal(1);
+export const WithdrawalStatusComplate = t.literal(2);
+
+export const WithdrawalStatus = t.union([
+  WithdrawalStatusFailed,
+  WithdrawalStatusEmailConfrimation,
+  WithdrawalStatusPending,
+  WithdrawalStatusComplate,
+]);
+
+export const WithdrawalIPNHead = t.intersection([
   BaseIPN,
-  { type: IPN_TYPES.WITHDRAWAL }
->;
+  t.type({ type: t.literal(IPN_TYPES.WITHDRAWAL) }),
+]);
 
-export type WithdrawalIPNFields = O.MergeAll<
-  {},
-  [withCurrency, Partial<withTx>, withWithdrawalId]
->;
+export const WithdrawalIPNRequiredFields = t.type({
+  id: t.string,
+  status: WithdrawalStatus,
+  status_text: t.string,
+  address: t.string,
+  currency: t.string,
+  amount: t.string,
+  amounti: t.string,
+});
 
-export type WithdrawalIPN = O.Merge<WithdrawalIPNHead, WithdrawalIPNFields>;
+// Questionable -> Status 1 or 2?
+export const WithdrawalIPNOptionalFields = t.partial({
+  txn_id: t.string,
+});
 
-export type WithdrawalIPNLike = O.Merge<
+export const WithdrawalIPN = t.intersection([
   WithdrawalIPNHead,
-  O.Record<string, string>
->;
+  WithdrawalIPNRequiredFields,
+  WithdrawalIPNOptionalFields,
+]);

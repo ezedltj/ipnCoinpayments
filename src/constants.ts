@@ -1,0 +1,11 @@
+import { IPN_TYPES } from 'types/common.types';
+
+export const ALLOWED_IPN_TYPES = [
+  IPN_TYPES.API,
+  IPN_TYPES.BUTTON,
+  IPN_TYPES.CART,
+  IPN_TYPES.DEPOSIT,
+  IPN_TYPES.DONATION,
+  IPN_TYPES.SIMPLE,
+  IPN_TYPES.WITHDRAWAL,
+] as const;

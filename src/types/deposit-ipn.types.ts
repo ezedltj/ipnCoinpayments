@@ -1,26 +1,56 @@
-import { O } from 'ts-toolbelt';
-import { BaseIPN, IPN_TYPES, withCurrency, withTx } from './common.types';
+import * as t from 'io-ts';
 
-export type withDepositExtras = {
-  dest_tag?: string;
-  confirms: number;
-  fee?: string; // The fee deducted by CoinPayments (only sent when status >= 100)
-  feei?: string; // The fee deducted by CoinPayments in Satoshis (only sent when status >= 100)
-  fiat_coin: string; // The ticker code of the fiat currency you selected on the Merchant Settings tab of the Account Settings page (USD, EUR, etc.) Make sure to check this for accuracy for security in your IPN handler! Huh?
-  fiat_amount: string; // The total amount of the payment in the fiat currency you selected on the Merchant Settings tab of the Account Settings page.
-  fiat_amounti: string; // The total amount of the payment in the fiat currency you selected in Satoshis
-  fiat_fee?: string; // The fee deducted by CoinPayments in the fiat currency you selected (only sent when status >= 100)
-  fiat_feei?: string; // The fee deducted by CoinPayments in the fiat currency you selected in Satoshis (only sent when status >= 100)
-  label?: string; // The address label if you have one set
-};
+import { IPN_TYPES, BaseIPN } from './common.types';
+import { PositiveStatus, PendingStatus, NagativeStatus } from './status.types';
 
-export type DepositIPNHead = O.Merge<BaseIPN, { type: IPN_TYPES.DEPOSIT }>;
+export const DepositIPNHead = t.intersection([
+  BaseIPN,
+  t.type({ type: t.literal(IPN_TYPES.DEPOSIT) }),
+]);
 
-export type DepositIPNFields = O.MergeAll<
-  {},
-  [withTx, withCurrency, withDepositExtras]
->;
+export const DepositIPNRequiredFields = t.type({
+  deposit_id: t.string,
+  txn_id: t.string,
+  address: t.string,
+  status_text: t.string,
+  currency: t.string,
+  confirms: t.number,
+  amount: t.string,
+  amounti: t.string,
+  fiat_coin: t.string,
+  fiat_amount: t.string,
+  fiat_amounti: t.string,
+});
 
-export type DepositIPN = O.Merge<DepositIPNHead, DepositIPNFields>;
+export const DepositIPNOptionalFields = t.partial({
+  dest_tag: t.string,
+  label: t.string,
+});
 
-export type DepositIPNLike = O.Merge<DepositIPNHead, O.Record<string, string>>;
+export const DepositIPNFields = t.intersection([
+  DepositIPNHead,
+  DepositIPNRequiredFields,
+  DepositIPNOptionalFields,
+]);
+
+export const DefaultDepositIPN = t.exact(
+  t.intersection([
+    DepositIPNFields,
+    t.type({ status: t.union([NagativeStatus, PendingStatus]) }),
+  ]),
+);
+
+export const PositiveDepositIPN = t.exact(
+  t.intersection([
+    DepositIPNFields,
+    t.type({ status: PositiveStatus }),
+    t.partial({
+      fee: t.string,
+      feei: t.string,
+      fiat_fee: t.string,
+      fiat_feei: t.string,
+    }),
+  ]),
+);
+
+export const DepositIPN = t.union([DefaultDepositIPN, PositiveDepositIPN]);

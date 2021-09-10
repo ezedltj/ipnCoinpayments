@@ -1,16 +1,21 @@
-import { withBuyerShippingAddress } from './common.types';
-import { O } from 'ts-toolbelt';
+import * as t from 'io-ts';
+import { Predicate } from 'fp-ts/Predicate';
 
-export type withShipping<T extends object> = O.Merge<
-  T,
-  withBuyerShippingAddress
->;
-
-export type withIterableKeys<T extends object> = {
-  [Property in keyof T as `${string & Property}_${number}`]: T[Property];
+export type Iterate<A> = {
+  [Key in keyof A as `${Key & string}${number}`]: A[Key];
 };
 
-// Incoming
-export type Raw<T extends object> = {
-  [P in keyof T]: string;
+export const Number = (predicate: Predicate<number>) => {
+  return new t.Type<number, number, unknown>(
+    'number',
+    (input: unknown): input is number => {
+      typeof input === 'number' && predicate(input);
+      return true;
+    },
+    (input, context) =>
+      typeof input === 'number' && predicate(input)
+        ? t.success(input)
+        : t.failure(input, context),
+    t.identity,
+  );
 };
