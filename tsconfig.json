@@ -18,6 +18,7 @@
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strict": true,
+    "downlevelIteration": true
   },
   "include": ["./src/**/*.ts", "./tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]

@@ -1,5 +1,25 @@
 import * as t from 'io-ts';
 
+export interface IPNSecretBrand {
+  readonly IPNSecret: unique symbol;
+}
+
+export interface HMACBrand {
+  readonly HMAC: unique symbol;
+}
+
+export const IPNSecret = t.brand(
+  t.string,
+  (n): n is t.Branded<string, IPNSecretBrand> => n.length > 0,
+  'IPNSecret',
+);
+
+export const HMAC = t.brand(
+  t.string,
+  (n): n is t.Branded<string, HMACBrand> => n.length > 0,
+  'HMAC',
+);
+
 export enum IPN_TYPES {
   SIMPLE = 'simple',
   BUTTON = 'button',
@@ -42,3 +62,18 @@ export const ShippingInformation = t.partial({
   country_name: t.string,
   phone: t.string,
 });
+
+export const CoinpaymentsIPNLike = t.intersection([
+  BaseIPN,
+  t.type({
+    type: t.union([
+      t.literal(IPN_TYPES.API),
+      t.literal(IPN_TYPES.BUTTON),
+      t.literal(IPN_TYPES.CART),
+      t.literal(IPN_TYPES.DEPOSIT),
+      t.literal(IPN_TYPES.DONATION),
+      t.literal(IPN_TYPES.SIMPLE),
+      t.literal(IPN_TYPES.WITHDRAWAL),
+    ]),
+  }),
+]);
